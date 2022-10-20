@@ -1,0 +1,13 @@
+# git
+.git
+.gitignore
+
+# docker
+.dockerignore
+Dockerfile*
+
+# scripts
+Psakefile.ps1
+
+# directories
+pwsh/
