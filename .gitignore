@@ -1,1 +1,7 @@
+# docker-related
 .env
+!.env.sample
+
+# pedscreen
+*.properties
+!*.sample.properties
