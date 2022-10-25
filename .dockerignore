@@ -15,6 +15,9 @@ pwsh/
 # environment
 .env*
 
+# pedscreen
+*.sample.properties
+
 # misc
 LICENSE
 README.md
