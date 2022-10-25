@@ -11,3 +11,10 @@ Psakefile.ps1
 
 # directories
 pwsh/
+
+# environment
+.env*
+
+# misc
+LICENSE
+README.md
