@@ -1,71 +1,47 @@
-#
-# source stage: retrieve source code from github
-#
+FROM ghcr.io/craibuc/windows-sbt:latest AS build
 
-FROM mcr.microsoft.com/powershell:nanoserver-1809 AS source
-
-# to be modified by `docker build`
-# docker build --build-arg "GITHUB_TOKEN=$env:GITHUB_TOKEN" --build-arg "BRANCH=$BRANCH" .
-
-ARG REPO_URI="https://github.com/chop-dbhi/ped-screen"
+ARG REPO_URI=https://github.com/chop-dbhi/ped-screen
 ARG BRANCH=main
-ARG GITHUB_TOKEN
-
-# RUN echo "BRANCH: %BRANCH%"
-# RUN echo "GITHUB_TOKEN: %GITHUB_TOKEN%"
-
-# configure powershell
-SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-RUN Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-
-# all artifacts add to /temp
-WORKDIR /temp
-
-# copy the files and directories that aren't excluded by .dockerignore to /temp
-COPY . .
-
-# run powershell script to get branch's repo as a ZIP archive, expand it, then move it to the /source directory
-RUN .\Get-Archive.ps1 -Branch $env:BRANCH -Verbose
 
 #
-# build stage: compile app into a single, fat JAR file
+# clone specified branch of ped-screen's repository
 #
 
-FROM openjdk:18-jdk-nanoserver-1809 AS build
+WORKDIR /source
 
-WORKDIR /app
-
-# copy from /source to /app
-COPY --from=source ./source .
+# clone the remote repository's branch to /source
+RUN echo Cloning %REPO_URI%/tree/%BRANCH%...
+RUN git clone %REPO_URI% -b %BRANCH% .
 
 # copy local settings files
 # COPY *.properties ./conf/local/
+COPY ./conf/local/*.properties ./conf/local/
 
 # create "fat" .JAR file
-# RUN sbt assembly
+RUN sbt assembly
 
 #
-# final stage
+# final image
 #
 
 # FROM openjdk:${OPENJDK_TAG}
-FROM openjdk:18-jdk-nanoserver-1809 AS final
+# FROM openjdk:18-jdk-nanoserver-1809
 
-WORKDIR /app
+# WORKDIR /app
 
 # # configuration files
-# COPY --from=build ./source/conf/local/*.properties ./conf/local/
-# # SQL files
-# COPY --from=build ./source/sql ./sql
-# # application (rename to remove version)
-# COPY --from=build ./source/target/scala*/pedscreen*.jar ./pedscreen.jar
+COPY --from=build .\\source\\conf\\local\\source.properties .\\conf\\local\\
+COPY --from=build .\\source\\conf\\local\\target.properties .\\conf\\local\\
+COPY --from=build .\\source\\conf\\local\\pedscreen.properties .\\conf\\local\\
 
-# # default executable and parameters that can't be modified by docker run
-# ENTRYPOINT ["java","-jar","pedscreen.jar","pedscreen","--pecarn"]
+# SQL files
+COPY --from=build .\\source\\sql .\\sql
 
-# # added to ENTRYPOINT command; can be modified by docker run
-# CMD ["--list_params"]
+# application (rename to remove version)
+COPY --from=build .\\source\\target\\scala-2.12\\pedscreen*.jar .\\pedscreen.jar
 
-# java -jar pedscreen.jar pedscreen --pecarn --list_params
+# default executable and parameters that can't be modified by docker run
+ENTRYPOINT ["java","-jar","pedscreen.jar","pedscreen","--pecarn"]
 
-# CMD ["java","--version"]
+# added to ENTRYPOINT command; can be modified by docker run
+CMD ["--list_params"]
