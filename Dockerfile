@@ -1,5 +1,8 @@
 FROM ghcr.io/craibuc/windows-sbt:latest AS build
 
+#
+# supply desired values as build arguments
+#
 ARG REPO_URI=https://github.com/chop-dbhi/ped-screen
 ARG BRANCH=main
 
@@ -14,7 +17,6 @@ RUN echo Cloning %REPO_URI%/tree/%BRANCH%...
 RUN git clone %REPO_URI% -b %BRANCH% .
 
 # copy local settings files
-# COPY *.properties ./conf/local/
 COPY ./conf/local/*.properties ./conf/local/
 
 # create "fat" .JAR file
@@ -24,21 +26,20 @@ RUN sbt assembly
 # final image
 #
 
-# FROM openjdk:${OPENJDK_TAG}
-# FROM openjdk:18-jdk-nanoserver-1809
+FROM openjdk:18-jdk-nanoserver-1809
 
-# WORKDIR /app
+WORKDIR /app
 
 # # configuration files
-COPY --from=build .\\source\\conf\\local\\source.properties .\\conf\\local\\
-COPY --from=build .\\source\\conf\\local\\target.properties .\\conf\\local\\
-COPY --from=build .\\source\\conf\\local\\pedscreen.properties .\\conf\\local\\
+COPY --from=build c:\\source\\conf\\local\\source.properties .\\conf\\local\\source.properties
+COPY --from=build c:\\source\\conf\\local\\target.properties .\\conf\\local\\target.properties
+COPY --from=build c:\\source\\conf\\local\\pedscreen.properties .\\conf\\local\\pedscreen.properties
 
 # SQL files
-COPY --from=build .\\source\\sql .\\sql
+COPY --from=build c:\\source\\sql .\\sql
 
 # application (rename to remove version)
-COPY --from=build .\\source\\target\\scala-2.12\\pedscreen*.jar .\\pedscreen.jar
+COPY --from=build c:\\source\\target\\scala-2.12\\pedscreen-1.2.jar .\\pedscreen.jar
 
 # default executable and parameters that can't be modified by docker run
 ENTRYPOINT ["java","-jar","pedscreen.jar","pedscreen","--pecarn"]
