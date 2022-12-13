@@ -6,16 +6,28 @@ A Windows-based, Docker container for the ped-screen application.
 ### Build
 
 #### Export environment variables
-> NOTE: this could be added to `$profile`.
+
+Use PowerShell to set your user-specific environment variables:
 
 ```powershell
+[Environment]::SetEnvironmentVariable("GITHUB_ACCOUNT", "<github account>", "User")
+[Environment]::SetEnvironmentVariable("GITHUB_TOKEN", "<github personal-access token (PAT)>", "User")
+[Environment]::SetEnvironmentVariable("GITHUB_BRANCH", "<github branch name>", "User")
+```
+
+**Or**
+
+Add the values to your `$profile` file.
+
+```powershell
+$env:GITHUB_ACCOUNT=<github account>
 $env:GITHUB_TOKEN=<github personal-access token (PAT)>
-$env:BRANCH=<github branch name>
+$env:GITHUB_BRANCH=<github branch name>
 ```
 
 #### Build the image
 ```powershell
-PS> docker build --build-arg "GITHUB_TOKEN=$env:GITHUB_TOKEN" --build-arg "BRANCH=$env:BRANCH" --tag "pedscreen-win:latest" .
+PS> docker build --build-arg "GITHUB_TOKEN=$env:GITHUB_TOKEN" --build-arg "GITHUB_BRANCH=$env:GITHUB_BRANCH" --tag "pedscreen-win:latest" .
 ```
 
 ### Run
