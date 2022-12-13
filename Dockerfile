@@ -4,7 +4,8 @@ FROM ghcr.io/craibuc/windows-sbt:latest AS build
 # supply desired values as build arguments
 #
 ARG REPO_URI=https://github.com/chop-dbhi/ped-screen
-ARG BRANCH=main
+ARG APP_VERSION=1.2
+ARG GITHUB_BRANCH=main
 
 #
 # clone specified branch of ped-screen's repository
@@ -13,8 +14,8 @@ ARG BRANCH=main
 WORKDIR /source
 
 # clone the remote repository's branch to /source
-RUN echo Cloning %REPO_URI%/tree/%BRANCH%...
-RUN git clone %REPO_URI% -b %BRANCH% .
+RUN echo Cloning %REPO_URI%/tree/%GITHUB_BRANCH%...
+RUN git clone %REPO_URI% -b %GITHUB_BRANCH% .
 
 # copy local settings files
 COPY ./conf/local/*.properties ./conf/local/
