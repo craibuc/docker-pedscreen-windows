@@ -1,5 +1,7 @@
 <#
 .SYNOPSIS
+This file defines the tasks that can be used to automate Docker commands.
+
 PSake is a build-automation tool written in Powershell, similar to `make` or `ant`.
 
 .EXAMPLE
@@ -68,10 +70,10 @@ Task Terminal {
 
 Task Params {
 	Write-Host 'Starting ped-screen; listing parameters...'
-    docker run -it --rm --env-file=.env "$APP_NAME`:latest"
+    docker run -it --rm --env-file=.pedscreen/.env "$APP_NAME`:latest"
 }
 
-Task Publish {
+Task Github {
 	Write-Host 'Publishing image to Github...'
 	$env:GITHUB_TOKEN | docker login ghcr.io -u $env:GITHUB_ACCOUNT --password-stdin
     docker tag $APP_NAME "ghcr.io/$($env:GITHUB_ACCOUNT)/$APP_NAME"
