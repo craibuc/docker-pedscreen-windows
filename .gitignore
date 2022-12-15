@@ -1,7 +1,15 @@
-# docker-related
+# environment-related files
 .env
 !.env.sample
+
+# docker compose
+docker-compose.yaml
+!docker-compose.sample.yaml
 
 # pedscreen
 *.properties
 !*.sample.properties
+
+# postgres
+initdb.sql
+!initdb.sample.sql
