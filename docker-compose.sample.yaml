@@ -1,0 +1,113 @@
+# Usage:
+
+# export environment variables
+# ps> $env:DATE_START='2021/03/01'
+# ps> $env:DATE_END='2021/03/31'
+
+# list all environment variables (for validation)
+# ps> ls env:
+
+# start all containers
+# ps> docker-compose --env-file .postgres/.env up -d
+
+# monitor the logs, optionally supplying the name of the service to filter the logs
+# ps> docker-compose logs -f [database|app]
+
+# stop and remove all containers and network
+# ps> docker-compose down
+
+version: "3.7"
+
+#
+# define the 'base' database which will be referenced by each instance
+#
+
+x-database: &database
+    image: stellirin/postgres-windows:10.10 
+    volumes:
+        # copy the DB-initialization script (initdb.sql) to the container
+        - .postgres\initdb\:c:\docker-entrypoint-initdb.d\
+    env_file:
+        - .postgres/.env
+    healthcheck:
+        # ensure that the database is ready for usage by the application
+        # values for POSTGRES_DATABASE and POSTGRES_USER are supplied by the .postgres/.env file
+        test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DATABASE}", "-U", "${POSTGRES_USER}" ]
+        timeout: 45s
+        interval: 10s
+        retries: 10
+    restart: unless-stopped
+
+#
+# define the 'base' application which will be referenced by each instance
+#
+
+x-application: &application
+    image: pedscreen-win:latest
+    env_file:
+        - .pedscreen/.env
+    volumes:
+        # mount host directory to container
+      - .\output\:C:\app\output\
+      - .\log\:c:\app\log\
+
+services:
+
+    #
+    # database instances
+    #
+
+    db0:
+        <<: *database
+        container_name: "db-a"
+        ports:
+            - 10000:5432 # access this instance from workstation jdbc:postgresql://db0:10000/pedscreen
+  
+    db1:
+        <<: *database
+        container_name: "db-b"
+        ports:
+            - 20000:5432 # access this instance from workstation jdbc:postgresql://db1:20000/pedscreen
+
+    db2:
+        <<: *database
+        container_name: "db-c"
+        ports:
+            - 30000:5432 # access this instance from workstation jdbc:postgresql://db2:30000/pedscreen
+
+    #
+    # application instances
+    #
+
+    app0:
+        <<: *application
+        container_name: "app-a"
+        # values for DATE_START and DATE_END are supplied by environment variables
+        command: ["--location_id","AAAA","--department_id","111111","--date_start","${DATE_START}","--date_end","${DATE_END}"]
+        environment:
+            - POSTGRES_URI=jdbc:postgresql://db0:5432/pedscreen
+        depends_on:
+            db0:
+                condition: service_healthy
+
+    app1:
+        <<: *application
+        container_name: "app-b"
+        # values for DATE_START and DATE_END are supplied by environment variables
+        command: ["--location_id","BBBB","--department_id","222222","--date_start","${DATE_START}","--date_end","${DATE_END}"]
+        environment:
+            - POSTGRES_URI=jdbc:postgresql://db1:5432/pedscreen
+        depends_on:
+            db1:
+                condition: service_healthy
+
+    app2:
+        <<: *application
+        container_name: "app-c"
+        # values for DATE_START and DATE_END are supplied by environment variables
+        command: ["--location_id","CCCC","--department_id","333333","--date_start","${DATE_START}","--date_end","${DATE_END}"]
+        environment:
+            - POSTGRES_URI=jdbc:postgresql://db2:5432/pedscreen
+        depends_on:
+            db2:
+                condition: service_healthy
