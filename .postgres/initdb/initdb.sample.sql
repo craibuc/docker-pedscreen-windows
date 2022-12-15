@@ -1,8 +1,6 @@
 \qecho 'Creating user...'
 
 CREATE USER pedscreen WITH PASSWORD 'pedscreen';
--- TODO: make use of PEDSCREEN_PASSWORD environment variable, specified in .env file
--- CREATE USER pedscreen WITH PASSWORD '${PEDSCREEN_PASSWORD}';
 
 \qecho 'Creating database...'
 CREATE DATABASE pedscreen;
