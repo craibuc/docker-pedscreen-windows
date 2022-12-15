@@ -5,18 +5,25 @@
 # docker
 .dockerignore
 Dockerfile*
+docker-compose*
 
 # scripts
 Psakefile.ps1
 
 # directories
 pwsh/
+log/
+output/
 
 # environment
 .env*
 
 # pedscreen
+.pedscreen/
 *.sample.properties
+
+# postgres
+.postgres/
 
 # misc
 LICENSE
