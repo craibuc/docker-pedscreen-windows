@@ -44,11 +44,19 @@ x-database: &database
 
 x-application: &application
     image: pedscreen-win:latest
+    build:
+        context: .
+        args:
+            - REPO_URI=https://${GITHUB_ACCOUNT}:${GITHUB_TOKEN}@github.com/chop-dbhi/ped-screen
+            - GITHUB_BRANCH=${GITHUB_BRANCH}
+        tags:
+            - pedscreen-win:latest
+            - ghcr.io/${GITHUB_ACCOUNT}/pedscreen-win    
     env_file:
         - .pedscreen/.env
     volumes:
         # mount host directory to container
-      - .\output\:C:\app\output\
+      - .\output\:c:\app\output\
       - .\log\:c:\app\log\
 
 services:
