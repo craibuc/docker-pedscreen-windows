@@ -1,23 +1,26 @@
 # docker-pedscreen-windows
-A Windows-based, Docker container for the ped-screen application.
+A Windows-based, Docker container for the [pedscreen](https://github.com/chop-dbhi/ped-screen) application.
 
 ## Configuration
 One-time configuration tasks to be completed.
 
 > NOTE: unless otherwise indicated, the PowerShell commands should be executed in the project's root folder (`PS>`).
 
-### Github
-These settings allow you to clone a branch of the [ped-screen](https://github.com/chop-dbhi/ped-screen) application.
+#### Github
 
-Use PowerShell to set your user-specific environment variables:
+These settings are used to clone a branch of the [pedscreen](https://github.com/chop-dbhi/ped-screen) application.
+
+Use Windows' Advanced Setting UI to create these variables: `GITHUB_ACCOUNT`, `GITHUB_TOKEN`, `GITHUB_BRANCH`.
+
+** OR **
+
+Use PowerShell to set the user-specific environment variables:
 
 ```powershell
 [Environment]::SetEnvironmentVariable("GITHUB_ACCOUNT", "<github account>", "User")
 [Environment]::SetEnvironmentVariable("GITHUB_TOKEN", "<github personal-access token (PAT)>", "User")
 [Environment]::SetEnvironmentVariable("GITHUB_BRANCH", "<github branch name>", "User")
 ```
-
-> NOTE: you can also use the Advance Setting UI to create these variables.
 
 ### Pedscreen
 
@@ -63,25 +66,24 @@ Modify the contents of the file to meet your needs.
 PS> New-Item -ItemType SymbolicLink -Path . -Name '.env' -Target '.postgres/.env'
 ```
 
-## Build the image
+## Build
+The image can be built using `docker` or `docker compose`.  The later is preferred.
 
+### docker
 Creates the pedscreen image, using the supplied arguments.
 
 ```powershell
 PS> docker build --build-arg "GITHUB_TOKEN=$env:GITHUB_TOKEN" --build-arg "GITHUB_BRANCH=$env:GITHUB_BRANCH" --tag "pedscreen-win:latest" .
 ```
 
-## Testing the image
+### docker compose
+It is easier, however, to use docker-compose to build the ped-screen image.  The build settings are contained in the `docker-comfig.yaml` file.
 
-Run container and display ped-screen's parameters:
-
-```bash
-PS> docker run --rm --env-file=.pedscreen/.env pedscreen-win:latest
+```powershell
+PS> docker compose build
 ```
-
-## Run the application using Docker Compose
-
-By using Docker Compose, an application/database container pair will be created for each location (3 pairs in the default configuration).
+## Run
+Because the `pedscreen` application depends on an instance of `postgres`, it is recommend to use `docker compose` to run the containers.  By using `docker compose`, an application/database container pair will be created for each location (3 pairs in the default configuration).
 
 #### Export the date ranges as environment variables
 
