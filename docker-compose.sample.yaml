@@ -31,8 +31,8 @@ x-database: &database
         - .postgres/.env
     healthcheck:
         # ensure that the database is ready for usage by the application
-        # values for POSTGRES_DATABASE and POSTGRES_USER are supplied by the .postgres/.env file
-        test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DATABASE}", "-U", "${POSTGRES_USER}" ]
+        # values for POSTGRES_DB and POSTGRES_USER are supplied by the .postgres/.env file
+        test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
         timeout: 45s
         interval: 10s
         retries: 10
