@@ -1,11 +1,29 @@
-FROM ghcr.io/craibuc/windows-sbt:latest AS build
+FROM windows-sbt:latest AS build
 
 #
 # supply desired values as build arguments
 #
-ARG REPO_URI=https://github.com/chop-dbhi/ped-screen
+
+ARG GIT_VERSION=2.38.1
+# RUN echo GIT_VERSION: %GIT_VERSION%
+
+ARG REPO_URI
+# RUN echo REPO_URI: %REPO_URI%
+
+ARG GITHUB_BRANCH
+# RUN echo GITHUB_BRANCH: %GITHUB_BRANCH%
+
 ARG APP_VERSION=1.2
-ARG GITHUB_BRANCH=main
+
+WORKDIR /temp
+
+#
+# git (version control)
+#
+
+# retrieve and install package
+RUN curl -L -o Git-%GIT_VERSION%-64-bit.exe https://github.com/git-for-windows/git/releases/download/v%GIT_VERSION%.windows.1/Git-%GIT_VERSION%-64-bit.exe
+RUN .\Git-%GIT_VERSION%-64-bit.exe /VERYSILENT /NORESTART
 
 #
 # clone specified branch of ped-screen's repository
@@ -27,11 +45,11 @@ RUN sbt assembly
 # final image
 #
 
-FROM openjdk:18-jdk-nanoserver-1809
+FROM winamd64/eclipse-temurin
 
 WORKDIR /app
 
-# # configuration files
+# configuration files
 COPY --from=build c:\\source\\conf\\local\\source.properties .\\conf\\local\\source.properties
 COPY --from=build c:\\source\\conf\\local\\target.properties .\\conf\\local\\target.properties
 COPY --from=build c:\\source\\conf\\local\\pedscreen.properties .\\conf\\local\\pedscreen.properties
